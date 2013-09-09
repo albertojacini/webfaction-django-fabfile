@@ -2,6 +2,7 @@
 
 WF_HOST       =     "example.webfaction.com"
 PROJECT_NAME  =     "foo"
+PROJECT_DIR   =     "/home/dry02/milanovino/production/milanovino_project"
 REPOSITORY    =     "git@github.com:joe/foo.git"
 USER          =     "joe"
 PASSWORD      =     "secret"
