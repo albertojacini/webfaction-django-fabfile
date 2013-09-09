@@ -1,10 +1,11 @@
 # your projects settings
 
-WF_HOST       =     "example.webfaction.com"
-PROJECT_NAME  =     "foo"
-PROJECT_DIR   =     "/home/dry02/milanovino/production/milanovino_project"
-REPOSITORY    =     "git@github.com:joe/foo.git"
-USER          =     "joe"
-PASSWORD      =     "secret"
-SETTINGS_SUBDIR =   "foo"
-VIRTUALENVS   =     "/path/to/virtualenvs"
+WF_HOST             = "web331.webfaction.com"
+PROJECT_NAME        = "milanovino"
+PROJECT_DIR_PARENT  = "/home/dry02/milanovino/production"
+PROJECT_DIR         = "/home/dry02/milanovino/production/milanovino_project"
+REPOSITORY          = "git@bitbucket.org:albertojacini/milanovino-project.git"
+USER                = "myname"
+PASSWORD            = "secret"
+SETTINGS_SUBDIR     = "foo"  # Todo: what should I do with this?
+VIRTUALENVS         = "/home/myname/.virtualenvs"

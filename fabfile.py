@@ -13,7 +13,7 @@ import sys
 import string, random
 
 try:
-    from fabsettings import WF_HOST, PROJECT_NAME, PROJECT_DIR, REPOSITORY, USER, PASSWORD, VIRTUALENVS, SETTINGS_SUBDIR
+    from fabsettings import WF_HOST, PROJECT_NAME, PROJECT_DIR, PROJECT_DIR_PARENT, REPOSITORY, USER, PASSWORD, VIRTUALENVS, SETTINGS_SUBDIR
 except ImportError:
     print "ImportError: Couldn't find fabsettings.py, it either does not exist or giving import problems (missing settings)"
     sys.exit(1)
@@ -24,6 +24,7 @@ env.password            = PASSWORD
 env.home                = "/home/%s" % USER
 env.project_name        = PROJECT_NAME
 env.project_dir         = PROJECT_DIR
+env.project_dir_parent  = PROJECT_DIR_PARENT
 env.repo                = REPOSITORY
 env.webfaction_app_dir  = env.home + '/webapps/' + env.project_name
 env.settings_dir        = env.webfaction_app_dir + '/' + SETTINGS_SUBDIR
@@ -65,8 +66,8 @@ def install_app():
                     }
                     )
 
-    with cd(env.home + '/webapps'):
-        if not exists(env.project_dir + '/setup.py'):
+    with cd(env.project_dir_parent):
+        if not exists(env.project_dir):
             run('git clone %s %s' % (env.repo, env.project_dir))
 
     _create_ve(env.project_name)
