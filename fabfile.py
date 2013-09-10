@@ -74,6 +74,7 @@ def install_app():
                     '{0}/conf.d/{1}.conf'.format(env.supervisor_dir, env.project_name),
                     {
                         'project': env.project_name,
+                        'project_django_dir': env.project_django_dir,
                         'webfaction_app_dir': env.project_dir,  # Todo: is this correct???
                         'virtualenv': '{0}/{1}'.format(env.virtualenv_dir, env.project_name),
                         'port': env.app_port,
@@ -85,7 +86,7 @@ def install_app():
         if not exists(env.project_dir):
             run('git clone {0} {1}'.format(env.repo, env.project_dir))
 
-    _create_ve(env.project_name)
+    #_create_ve(env.project_name)
     reload_app()
     restart_app()
 
