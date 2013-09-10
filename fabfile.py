@@ -13,24 +13,39 @@ import sys
 import string, random
 
 try:
-    from fabsettings import WF_HOST, PROJECT_NAME, PROJECT_DIR, PROJECT_DIR_PARENT, REPOSITORY, USER, PASSWORD, VIRTUALENVS, SETTINGS_SUBDIR
+    from fabsettings import (WF_HOST,
+                             PROJECT_NAME,
+                             PROJECT_DIR_NAME,
+                             PROJECT_PARENT_DIR,
+                             PROJECT_DIR,
+                             PROJECT_DJANGO_DIR,
+                             PROJECT_SETTINGS_MODULE,
+                             REPOSITORY,
+                             USER,
+                             PASSWORD,
+                             VIRTUALENVS,
+                             SETTINGS_SUBDIR,
+                             )
 except ImportError:
     print "ImportError: Couldn't find fabsettings.py, it either does not exist or giving import problems (missing settings)"
     sys.exit(1)
 
-env.hosts               = [WF_HOST]
-env.user                = USER
-env.password            = PASSWORD
-env.home                = "/home/%s" % USER
-env.project_name        = PROJECT_NAME
-env.project_dir         = PROJECT_DIR
-env.project_dir_parent  = PROJECT_DIR_PARENT
-env.repo                = REPOSITORY
-env.webfaction_app_dir  = env.home + '/webapps/' + env.project_name
-env.settings_dir        = env.webfaction_app_dir + '/' + SETTINGS_SUBDIR
-env.supervisor_dir      = env.home + '/webapps/supervisor'
-env.virtualenv_dir      = VIRTUALENVS
-env.supervisor_ve_dir   = env.virtualenv_dir + '/supervisor'
+env.hosts                       = [WF_HOST]
+env.user                        = USER
+env.password                    = PASSWORD
+env.home                        = "/home/%s" % USER
+env.project_name                = PROJECT_NAME
+env.project_dir_name            = PROJECT_DIR_NAME
+env.project_parent_dir          = PROJECT_PARENT_DIR
+env.project_dir                 = PROJECT_DIR
+env.project_django_dir          = PROJECT_DJANGO_DIR
+env.project_settings_module     = PROJECT_SETTINGS_MODULE
+env.repo                        = REPOSITORY
+env.webfaction_app_dir          = env.home + '/webapps/' + env.project_name
+env.settings_dir                = env.webfaction_app_dir + '/' + SETTINGS_SUBDIR
+env.supervisor_dir              = env.home + '/webapps/supervisor'
+env.virtualenv_dir              = VIRTUALENVS
+env.supervisor_ve_dir           = env.virtualenv_dir + '/supervisor'
 
 
 def deploy():
@@ -66,9 +81,9 @@ def install_app():
                     }
                     )
 
-    with cd(env.project_dir_parent):
+    with cd(env.project_parent_dir):
         if not exists(env.project_dir):
-            run('git clone %s %s' % (env.repo, env.project_dir))
+            run('git clone {0} {1}'.format(env.repo, env.project_dir))
 
     _create_ve(env.project_name)
     reload_app()
@@ -125,25 +140,25 @@ def install_supervisor():
 def reload_app(arg=None):
     """Pulls app and refreshes requirements"""
 
-    with cd(env.webfaction_app_dir):
+    with cd(env.project_dir):
         run('git pull')
 
-    if arg <> "quick":
-        with cd(env.webfaction_app_dir):
-            _ve_run(env.project_name, "pip install -r requirements.pip")
-            _ve_run(env.project_name, "pip install -e ./")
-            _ve_run(env.project_name, "manage.py syncdb")
-            _ve_run(env.project_name, "manage.py collectstatic")
-
-    restart_app()
+    if arg != "quick":
+        with cd(env.project_dir):
+            # _ve_run(env.project_name, "pip install gunicorn")
+            _ve_run(env.project_name, "pip install -r requirements/production.txt")
+        with cd(env.project_django_dir):
+            _ve_run(env.project_name, "python manage.py syncdb --settings={0}".format(env.project_settings_module))
+            _ve_run(env.project_name, "python manage.py migrate --settings={0}".format(env.project_settings_module))
+            _ve_run(env.project_name, "python manage.py collectstatic --settings={0}".format(env.project_settings_module))
 
 
 def restart_app():
     """Restarts the app using supervisorctl"""
 
     with cd(env.supervisor_dir):
-        _ve_run('supervisor','supervisorctl reread && supervisorctl reload')
-        _ve_run('supervisor','supervisorctl restart %s' % env.project_name)
+        _ve_run('supervisor', 'supervisorctl reread && supervisorctl reload')
+        _ve_run('supervisor', 'supervisorctl restart %s' % env.project_name)
 
 
 ### Helper functions
@@ -153,7 +168,7 @@ def _create_ve(name):
     """
     if not exists(env.virtualenv_dir + '/name'):
         with cd(env.virtualenv_dir):
-            run('mkvirtualenv -p /usr/local/bin/python2.7 --no-site-packages %s' % name)
+            run('mkvirtualenv -p /usr/local/bin/python2.7 --no-site-packages {0}'.format(name))
     else:
         print "Virtualenv with name %s already exists. Skipping." % name
 
