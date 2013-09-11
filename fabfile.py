@@ -153,6 +153,8 @@ def reload_app(arg=None):
             _ve_run(env.project_name, "python manage.py migrate --settings={0}".format(env.project_settings_module))
             _ve_run(env.project_name, "python manage.py collectstatic --settings={0}".format(env.project_settings_module))
 
+    restart_app()
+
 
 def restart_app():
     """Restarts the app using supervisorctl"""
