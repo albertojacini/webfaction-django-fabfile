@@ -151,7 +151,7 @@ def reload_app(arg=None):
         with cd(env.project_django_dir):
             _ve_run(env.project_name, "python manage.py syncdb --settings={0}".format(env.project_settings_module))
             _ve_run(env.project_name, "python manage.py migrate --settings={0}".format(env.project_settings_module))
-            _ve_run(env.project_name, "python manage.py collectstatic --settings={0}".format(env.project_settings_module))
+            _ve_run(env.project_name, "python manage.py collectstatic --noinput --settings={0}".format(env.project_settings_module))
 
     restart_app()
 
