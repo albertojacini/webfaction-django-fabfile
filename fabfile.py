@@ -86,7 +86,7 @@ def install_app():
         if not exists(env.project_dir):
             run('git clone {0} {1}'.format(env.repo, env.project_dir))
 
-    #_create_ve(env.project_name)
+    _create_ve(env.project_name)
     reload_app()
     restart_app()
 
