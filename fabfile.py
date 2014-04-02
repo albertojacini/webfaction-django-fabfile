@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+
 """
-Fabfile template for deploying django apps on webfaction using gunicorn,
-and supervisor.
+Fabfile template for deploying django apps on Webfaction using gunicorn and supervisor.
 """
 
 
 from fabric.api import *
 from fabric.contrib.files import upload_template, exists, append
+from fabric.colors import red, green, blue, cyan, magenta, white, yellow
 import xmlrpclib
 import sys
 
@@ -14,6 +15,7 @@ import string, random
 
 try:
     from fabsettings import (WF_HOST,
+                             IP_HOST,
                              PROJECT_NAME,
                              PROJECT_DIR_NAME,
                              PROJECT_PARENT_DIR,
@@ -31,6 +33,7 @@ except ImportError:
     sys.exit(1)
 
 env.hosts                       = [WF_HOST]
+env.ip_host                     = IP_HOST
 env.user                        = USER
 env.password                    = PASSWORD
 env.home                        = "/home/%s" % USER
@@ -48,12 +51,13 @@ env.virtualenv_dir              = VIRTUALENVS
 env.supervisor_ve_dir           = env.virtualenv_dir + '/supervisor'
 
 
+
 def deploy():
     bootstrap()
-    
+
     if not exists(env.supervisor_dir):
         install_supervisor()
-    
+
     install_app()
 
 
@@ -61,12 +65,13 @@ def bootstrap():
     run('mkdir -p %s/lib/python2.7' % env.home)
     run('easy_install-2.7 pip')
     run('pip-2.7 install virtualenv virtualenvwrapper')
+    run('mkdir -p %s/media' % env.project_parent_dir)
 
 
 def install_app():
     """Installs the django project in its own wf app and virtualenv
     """
-    response = _webfaction_create_app(env.project_name)
+    response = webfaction_create_app(env.project_name)
     env.app_port = response['port']
 
     # upload template to supervisor conf
@@ -78,6 +83,7 @@ def install_app():
                         'webfaction_app_dir': env.project_dir,  # Todo: is this correct???
                         'virtualenv': '{0}/{1}'.format(env.virtualenv_dir, env.project_name),
                         'port': env.app_port,
+                        'password': env.password,
                         'user': env.user,
                     }
                     )
@@ -87,13 +93,20 @@ def install_app():
             run('git clone {0} {1}'.format(env.repo, env.project_dir))
 
     _create_ve(env.project_name)
+    webfaction_configuration(env.project_name)
     reload_app()
     restart_app()
+
+def upload_secrets():
+    """upload secrets.json from local directory
+    """
+    upload_template('../../secrets.json', env.project_parent_dir)
+
 
 def install_supervisor():
     """Installs supervisor in its wf app and own virtualenv
     """
-    response = _webfaction_create_app("supervisor")
+    response = webfaction_create_app("supervisor")
     env.supervisor_port = response['port']
     _create_ve('supervisor')
     if not exists(env.supervisor_ve_dir + 'bin/supervisord'):
@@ -167,7 +180,7 @@ def restart_app():
 ### Helper functions
 
 def _create_ve(name):
-    """creates virtualenv using virtualenvwrapper
+    """Creates virtualenv using virtualenvwrapper
     """
     if not exists(env.virtualenv_dir + '/name'):
         with cd(env.virtualenv_dir):
@@ -177,18 +190,35 @@ def _create_ve(name):
 
 
 def _ve_run(ve, cmd):
-    """virtualenv wrapper for fabric commands
+    """Virtualenv wrapper for fabric commands
     """
     run("""source %s/%s/bin/activate && %s""" % (env.virtualenv_dir, ve, cmd))
 
 
-def _webfaction_create_app(app):
-    """creates a "custom app with port" app on webfaction using the webfaction public API.
+def webfaction_configuration(app):
+    webfaction_create_app_media(app)
+    webfaction_create_app_static(app)
+    webfaction_create_domain(app)
+    webfaction_create_website(app)
+    webfaction_create_postgres_db(app)
+
+########################
+### CREATE APP #########
+########################
+
+def webfaction_create_app(app):
+    """Creates a "custom app with port" app on webfaction using the webfaction public API.
     """
     server = xmlrpclib.ServerProxy('https://api.webfaction.com/')
     session_id, account = server.login(USER, PASSWORD)
     try:
-        response = server.create_app(session_id, app, 'custom_app_with_port', False, '')
+        response = server.create_app(
+            session_id,
+            app,
+            'custom_app_with_port',
+            False,
+            ''
+        )
         print "App on webfaction created: %s" % response
         return response
 
@@ -196,10 +226,132 @@ def _webfaction_create_app(app):
         print "Could not create app on webfaction %s, app name maybe already in use" % app
         sys.exit(1)
 
+########################
+### CREATE DOMAIN ######
+########################
+
+def webfaction_create_domain(app):
+    """Creates default domain on webfaction using the webfaction public API.
+    """
+    server = xmlrpclib.ServerProxy('https://api.webfaction.com/')
+    session_id, account = server.login(USER, PASSWORD)
+    domain = '%s.webfactional.com' % env.user
+
+    try:
+        response = server.create_domain(session_id, domain, app)
+        print green("Default domain on webfaction created: %s" % response)
+        return response
+
+    except xmlrpclib.Fault:
+        print red("Could not create domain on webfaction %s" % domain)
+        sys.exit(1)
+
+
+########################
+### CREATE MEDIA APP ###
+########################
+
+def webfaction_create_app_media(app):
+    """Creates a simlynk static only app on webfaction using the webfaction public API.
+    """
+    server = xmlrpclib.ServerProxy('https://api.webfaction.com/')
+    session_id, account = server.login(USER, PASSWORD)
+    app_name = '%s_media' % app
+    try:
+        response = server.create_app(
+            session_id,
+            app_name,
+            'symlink_static_only',
+            False,
+            env.project_parent_dir + '/media/'
+        )
+        print green("App media on webfaction created: %s" % response)
+        return response
+
+    except xmlrpclib.Fault:
+        print red("Could not create app media on webfaction %s, app name maybe already in use" % app_name)
+        sys.exit(1)
+
+########################
+### CREATE STATIC APP ##
+########################
+
+def webfaction_create_app_static(app):
+    """Creates a simlynk static only app on webfaction using the webfaction public API.
+    """
+    server = xmlrpclib.ServerProxy('https://api.webfaction.com/')
+    session_id, account = server.login(USER, PASSWORD)
+    app_name = '%s_static' % app
+    try:
+        response = server.create_app(
+            session_id,
+            app_name,
+            'symlink_static_only',
+            False,
+            env.project_django_dir + '/static_root/'
+        )
+        print green("App static on webfaction created: %s" % response)
+        return response
+
+    except xmlrpclib.Fault:
+        print red("Could not create app media on webfaction %s, app name maybe already in use" % app_name)
+        sys.exit(1)
+
+########################
+### CREATE WEBSITE   ###
+########################
+
+def webfaction_create_website(website):
+    """Creates website on webfaction and refers apps
+    """
+    server = xmlrpclib.ServerProxy('https://api.webfaction.com/')
+    session_id, account = server.login(USER, PASSWORD)
+
+    try:
+        response = server.create_website(
+            session_id,
+            website,
+            env.ip_host,
+            False,
+            ['%s.%s.webfactional.com' % (website, env.user)],
+            [env.project_name, '/'],
+            [env.project_name + '_static', '/static'],
+            [env.project_name + '_media', '/media'])
+        print(green("Website created: %s" % response))
+        return response
+
+    except xmlrpclib.Fault:
+        print red("Could not create %s website on webfaction " % website)
+        sys.exit(1)
+
+
+########################
+### CREATE POSTGRES DB #
+########################
+
+def webfaction_create_postgres_db(db):
+    """Creates postgres db
+    """
+    server = xmlrpclib.ServerProxy('https://api.webfaction.com/')
+    session_id, account = server.login(USER, PASSWORD)
+    try:
+        response = server.create_db(
+            session_id,
+            db,
+            'postgresql',
+            PASSWORD
+        )
+        print(green("Postgres database %s created" % response['name']))
+        return response
+
+    except xmlrpclib.Fault:
+        print red("Could not create postgres database on webfaction ")
+        sys.exit(1)
+
 
 def print_working_dir():
     """
-    REMOVE THIS. It just test the server connection.
+    TODO: REMOVE THIS. It just tests the server connection.
     """
     with cd(env.project_dir):
         with prefix('workon {0}'.format(env.project_name)):

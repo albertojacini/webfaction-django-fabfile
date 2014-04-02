@@ -1,11 +1,15 @@
 # your projects settings
 
-WF_HOST             = "web331.webfaction.com"
-PROJECT_NAME        = "milanovino"
-PROJECT_DIR_PARENT  = "/home/dry02/milanovino/production"
-PROJECT_DIR         = "/home/dry02/milanovino/production/milanovino_project"
-REPOSITORY          = "git@bitbucket.org:albertojacini/milanovino-project.git"
-USER                = "myname"
-PASSWORD            = "secret"
-SETTINGS_SUBDIR     = "foo"  # Todo: what should I do with this?
-VIRTUALENVS         = "/home/myname/.virtualenvs"
+WF_HOST                 = "web331.webfaction.com"
+IP_HOST                 = "111.222.333.444"
+PROJECT_NAME            = "foo"
+PROJECT_DIR_NAME        = "foo_project"
+PROJECT_PARENT_DIR      = "/home/dry02/foo"
+PROJECT_DIR             = "/home/dry02/foo/foo_project"
+PROJECT_DJANGO_DIR      = "/home/dry02/foo/foo_project/foo"
+PROJECT_SETTINGS_MODULE = "settings.production"
+REPOSITORY              = "git@bitbucket.org:albertojacini/foo-project.git"
+USER                    = "bar"
+PASSWORD                = "foo_pw"
+SETTINGS_SUBDIR         = "foo"  # Todo: what should I do with this?
+VIRTUALENVS             = "/home/bar/.virtualenvs"
