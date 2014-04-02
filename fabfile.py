@@ -54,6 +54,7 @@ env.supervisor_ve_dir           = env.virtualenv_dir + '/supervisor'
 
 def deploy():
     bootstrap()
+    upload_secrets()
 
     if not exists(env.supervisor_dir):
         install_supervisor()
@@ -65,6 +66,7 @@ def bootstrap():
     run('mkdir -p %s/lib/python2.7' % env.home)
     run('easy_install-2.7 pip')
     run('pip-2.7 install virtualenv virtualenvwrapper')
+    run('mkdir -p %s' % env.project_parent_dir)
     run('mkdir -p %s/media' % env.project_parent_dir)
 
 
@@ -96,6 +98,7 @@ def install_app():
     webfaction_configuration(env.project_name)
     reload_app()
     restart_app()
+
 
 def upload_secrets():
     """upload secrets.json from local directory
