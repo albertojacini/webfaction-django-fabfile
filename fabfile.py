@@ -54,7 +54,6 @@ env.supervisor_ve_dir           = env.virtualenv_dir + '/supervisor'
 
 def deploy():
     bootstrap()
-    upload_secrets()
 
     if not exists(env.supervisor_dir):
         install_supervisor()
@@ -66,7 +65,6 @@ def bootstrap():
     run('mkdir -p %s/lib/python2.7' % env.home)
     run('easy_install-2.7 pip')
     run('pip-2.7 install virtualenv virtualenvwrapper')
-    run('mkdir -p %s' % env.project_parent_dir)
     run('mkdir -p %s/media' % env.project_parent_dir)
 
 
@@ -98,7 +96,6 @@ def install_app():
     webfaction_configuration(env.project_name)
     reload_app()
     restart_app()
-
 
 def upload_secrets():
     """upload secrets.json from local directory
@@ -203,7 +200,7 @@ def webfaction_configuration(app):
     webfaction_create_app_static(app)
     webfaction_create_domain(app)
     webfaction_create_website(app)
-    webfaction_create_postgres_db(app)
+    # webfaction_create_postgres_db(app + '_pg')
 
 ########################
 ### CREATE APP #########
@@ -227,6 +224,8 @@ def webfaction_create_app(app):
 
     except xmlrpclib.Fault:
         print "Could not create app on webfaction %s, app name maybe already in use" % app
+        print red("If the app already exists, you must remove it and recreate it manually (otherwise ports can be \
+                   automathically detected.")
         sys.exit(1)
 
 ########################
@@ -247,7 +246,8 @@ def webfaction_create_domain(app):
 
     except xmlrpclib.Fault:
         print red("Could not create domain on webfaction %s" % domain)
-        sys.exit(1)
+        print red("The domain might already exists.")
+        # sys.exit(1)
 
 
 ########################
@@ -273,7 +273,8 @@ def webfaction_create_app_media(app):
 
     except xmlrpclib.Fault:
         print red("Could not create app media on webfaction %s, app name maybe already in use" % app_name)
-        sys.exit(1)
+        print red("An app with this name might already exists.")
+        # sys.exit(1)
 
 ########################
 ### CREATE STATIC APP ##
@@ -298,7 +299,8 @@ def webfaction_create_app_static(app):
 
     except xmlrpclib.Fault:
         print red("Could not create app media on webfaction %s, app name maybe already in use" % app_name)
-        sys.exit(1)
+        print red("An app with this name might already exists.")
+        # sys.exit(1)
 
 ########################
 ### CREATE WEBSITE   ###
@@ -325,7 +327,8 @@ def webfaction_create_website(website):
 
     except xmlrpclib.Fault:
         print red("Could not create %s website on webfaction " % website)
-        sys.exit(1)
+        print red("A website with this name might already exists.")
+        # sys.exit(1)
 
 
 ########################
@@ -349,7 +352,8 @@ def webfaction_create_postgres_db(db):
 
     except xmlrpclib.Fault:
         print red("Could not create postgres database on webfaction ")
-        sys.exit(1)
+        print red("A database with this name might already exists.")
+        # sys.exit(1)
 
 
 def print_working_dir():
@@ -359,4 +363,3 @@ def print_working_dir():
     with cd(env.project_dir):
         with prefix('workon {0}'.format(env.project_name)):
             run('pwd')
-
