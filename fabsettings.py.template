@@ -13,3 +13,7 @@ USER                    = "bar"
 PASSWORD                = "foo_pw"
 SETTINGS_SUBDIR         = "foo"  # Todo: what should I do with this?
 VIRTUALENVS             = "/home/bar/.virtualenvs"
+LOCAL_PROJECT_DIR       = "../.."  # ex /albericajacini_project
+PG_DATABASE_NAME        = "albericajacini"
+PG_DATABASE_USER        = "albericajacini"
+HOST                    = USER + "@" + WF_HOST # used for connection from local to server ex ajstudio1@web316.webfaction.com

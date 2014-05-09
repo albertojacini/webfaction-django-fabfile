@@ -8,6 +8,8 @@ Fabfile template for deploying django apps on Webfaction using gunicorn and supe
 from fabric.api import *
 from fabric.contrib.files import upload_template, exists, append
 from fabric.colors import red, green, blue, cyan, magenta, white, yellow
+from fabric.contrib.project import rsync_project
+from fabric.api import local
 import xmlrpclib
 import sys
 
@@ -27,6 +29,11 @@ try:
                              PASSWORD,
                              VIRTUALENVS,
                              SETTINGS_SUBDIR,
+                             PROJECT_MEDIA,
+                             LOCAL_PROJECT_DIR,
+                             PG_DATABASE_NAME,
+                             PG_DATABASE_USER,
+                             HOST,
                              )
 except ImportError:
     print "ImportError: Couldn't find fabsettings.py, it either does not exist or giving import problems (missing settings)"
@@ -44,6 +51,8 @@ env.project_dir                 = PROJECT_DIR
 env.project_django_dir          = PROJECT_DJANGO_DIR
 env.project_settings_module     = PROJECT_SETTINGS_MODULE
 env.repo                        = REPOSITORY
+env.pg_database_name            = PG_DATABASE_NAME
+env.pg_database_user            = PG_DATABASE_USER
 env.webfaction_app_dir          = env.home + '/webapps/' + env.project_name
 env.settings_dir                = env.webfaction_app_dir + '/' + SETTINGS_SUBDIR
 env.supervisor_dir              = env.home + '/webapps/supervisor'
@@ -363,3 +372,39 @@ def print_working_dir():
     with cd(env.project_dir):
         with prefix('workon {0}'.format(env.project_name)):
             run('pwd')
+
+
+
+def backup():
+    rsync_from_host()
+    pg_dump()
+    copy_pg_dump_to_local()
+
+
+### RSYNC MEDIA ####
+
+def rsync_from_host():
+    try:
+        local('rsync -avz {0}@{1}:{2} {3}' .format(env.user, env.hosts[0], PROJECT_MEDIA, LOCAL_PROJECT_DIR))
+        print green("Synchronized {0} media from {1} " .format(env.project_name, env.hosts[0]))
+    except:
+        print red("Could not syncronize {0} media from {1} " .format(env.project_name, env.hosts[0]))
+
+
+def rsync_to_host():
+     rsync_project(PROJECT_MEDIA, LOCAL_PROJECT_DIR, default_opts="-avz")
+
+
+### PG_DUMP ########
+
+def pg_dump():
+    try:
+        run('pg_dump -U {0} -W {1} > {1}.sql' .format(env.pg_database_user, env.pg_database_name,))
+        print green('{0} database dumped' .format(env.pg_database_name))
+    except:
+        print red('could not dump the {} database' .format(env.pg_database_name))
+
+
+def copy_pg_dump_to_local():
+    local('scp {0}:{1}.sql {2}' .format(HOST, env.pg_database_user, LOCAL_PROJECT_DIR,))
+    run('rm {0}.sql' .format(env.pg_database_user))
