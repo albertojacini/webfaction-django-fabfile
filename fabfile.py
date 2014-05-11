@@ -34,6 +34,7 @@ try:
                              PG_DATABASE_NAME,
                              PG_DATABASE_USER,
                              HOST,
+                             APACHE_DIR,
                              )
 except ImportError:
     print "ImportError: Couldn't find fabsettings.py, it either does not exist or giving import problems (missing settings)"
@@ -50,6 +51,7 @@ env.project_parent_dir          = PROJECT_PARENT_DIR
 env.project_dir                 = PROJECT_DIR
 env.project_django_dir          = PROJECT_DJANGO_DIR
 env.project_settings_module     = PROJECT_SETTINGS_MODULE
+env.apache_dir                  = APACHE_DIR
 env.repo                        = REPOSITORY
 env.pg_database_name            = PG_DATABASE_NAME
 env.pg_database_user            = PG_DATABASE_USER
@@ -109,7 +111,7 @@ def install_app():
 def upload_secrets():
     """upload secrets.json from local directory
     """
-    upload_template('../../secrets.json', env.project_parent_dir)
+    upload_template(LOCAL_PROJECT_DIR + '/secrets.json', env.project_parent_dir)
 
 
 def install_supervisor():
@@ -185,6 +187,16 @@ def restart_app():
         _ve_run('supervisor', 'supervisorctl reread && supervisorctl reload')
         _ve_run('supervisor', 'supervisorctl restart %s' % env.project_name)
 
+## restart Apache
+
+def restart_apache():
+    """
+    Restart Apache.
+    """
+    print "Restarting Apache ..."
+    with cd(env.apache_dir):
+        run('./restart')
+
 
 ### Helper functions
 
@@ -209,7 +221,7 @@ def webfaction_configuration(app):
     webfaction_create_app_static(app)
     webfaction_create_domain(app)
     webfaction_create_website(app)
-    # webfaction_create_postgres_db(app + '_pg')
+    webfaction_create_postgres_db(app + '_pg')
 
 ########################
 ### CREATE APP #########
