@@ -28,7 +28,7 @@ try:
                              PASSWORD,
                              VIRTUALENVS,
                              SETTINGS_SUBDIR,
-                             PROJECT_MEDIA,
+                             LOCAL_PROJECT_DIR,
                              LOCAL_PROJECT_DIR,
                              PG_DATABASE_NAME,
                              PG_DATABASE_USER,
