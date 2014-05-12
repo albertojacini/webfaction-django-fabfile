@@ -9,7 +9,6 @@ from fabric.api import *
 from fabric.contrib.files import upload_template, exists, append
 from fabric.colors import red, green, blue, cyan, magenta, white, yellow
 from fabric.contrib.project import rsync_project
-from fabric.api import local
 import xmlrpclib
 import sys
 
@@ -223,9 +222,9 @@ def webfaction_configuration(app):
     webfaction_create_website(app)
     webfaction_create_postgres_db(app + '_pg')
 
-########################
-### CREATE APP #########
-########################
+# -----------------------------------------------------------------------------
+# CREATE APP
+#  -----------------------------------------------------------------------------
 
 def webfaction_create_app(app):
     """Creates a "custom app with port" app on webfaction using the webfaction public API.
@@ -249,9 +248,9 @@ def webfaction_create_app(app):
                    automathically detected.")
         sys.exit(1)
 
-########################
-### CREATE DOMAIN ######
-########################
+# -----------------------------------------------------------------------------
+# CREATE DOMAIN
+# -----------------------------------------------------------------------------
 
 def webfaction_create_domain(app):
     """Creates default domain on webfaction using the webfaction public API.
@@ -271,9 +270,9 @@ def webfaction_create_domain(app):
         # sys.exit(1)
 
 
-########################
-### CREATE MEDIA APP ###
-########################
+# -----------------------------------------------------------------------------
+# CREATE MEDIA APP
+# -----------------------------------------------------------------------------
 
 def webfaction_create_app_media(app):
     """Creates a simlynk static only app on webfaction using the webfaction public API.
@@ -297,9 +296,9 @@ def webfaction_create_app_media(app):
         print red("An app with this name might already exists.")
         # sys.exit(1)
 
-########################
-### CREATE STATIC APP ##
-########################
+# -----------------------------------------------------------------------------
+# CREATE STATIC APP
+# -----------------------------------------------------------------------------
 
 def webfaction_create_app_static(app):
     """Creates a simlynk static only app on webfaction using the webfaction public API.
@@ -323,9 +322,9 @@ def webfaction_create_app_static(app):
         print red("An app with this name might already exists.")
         # sys.exit(1)
 
-########################
-### CREATE WEBSITE   ###
-########################
+# -----------------------------------------------------------------------------
+# CREATE WEBSITE
+# -----------------------------------------------------------------------------
 
 def webfaction_create_website(website):
     """Creates website on webfaction and refers apps
@@ -352,9 +351,9 @@ def webfaction_create_website(website):
         # sys.exit(1)
 
 
-########################
-### CREATE POSTGRES DB #
-########################
+# -----------------------------------------------------------------------------
+# CREATE POSTGRES DB
+# -----------------------------------------------------------------------------
 
 def webfaction_create_postgres_db(db):
     """Creates postgres db
@@ -385,17 +384,23 @@ def print_working_dir():
         with prefix('workon {0}'.format(env.project_name)):
             run('pwd')
 
-
+# -----------------------------------------------------------------------------
+# Backup media and postgres db
+# -----------------------------------------------------------------------------
 
 def backup():
     rsync_from_host()
+    dump()
+
+
+def dump():
     pg_dump()
     copy_pg_dump_to_local()
 
 
-### RSYNC MEDIA ####
-
 def rsync_from_host():
+    """rsync media from host
+    """
     try:
         local('rsync -avz {0}@{1}:{2} {3}' .format(env.user, env.hosts[0], PROJECT_MEDIA, LOCAL_PROJECT_DIR))
         print green("Synchronized {0} media from {1} " .format(env.project_name, env.hosts[0]))
@@ -404,19 +409,38 @@ def rsync_from_host():
 
 
 def rsync_to_host():
-     rsync_project(PROJECT_MEDIA, LOCAL_PROJECT_DIR, default_opts="-avz")
+    """rsync media from host
+    """
+    rsync_project(PROJECT_MEDIA, LOCAL_PROJECT_DIR, default_opts="-avz")  # todo: to be tested
 
-
-### PG_DUMP ########
 
 def pg_dump():
+    """dump remote postgres db
+    """
     try:
         run('pg_dump -U {0} -W {1} > {1}.sql' .format(env.pg_database_user, env.pg_database_name,))
         print green('{0} database dumped' .format(env.pg_database_name))
     except:
-        print red('could not dump the {} database' .format(env.pg_database_name))
+        print red('could not dump the {0} database' .format(env.pg_database_name))
+        sys.exit(1)
 
 
 def copy_pg_dump_to_local():
-    local('scp {0}:{1}.sql {2}' .format(HOST, env.pg_database_user, LOCAL_PROJECT_DIR,))
-    run('rm {0}.sql' .format(env.pg_database_user))
+    """copy dumped posgres db, copy on local machine and remove the remote one
+    """
+    try:
+        local('scp {0}:{1}.sql {2}' .format(HOST, env.pg_database_user, LOCAL_PROJECT_DIR,))
+        run('rm {0}.sql' .format(env.pg_database_name))
+    except:
+        print red('could not copy on local machine and remove remotly {0} database' .format(env.pg_database_name))
+        sys.exit(1)
+
+
+
+
+### reload database locally ###
+
+
+# load database
+
+# remove existing database
