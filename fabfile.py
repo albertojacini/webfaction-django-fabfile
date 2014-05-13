@@ -402,7 +402,7 @@ def rsync_from_host():
     """rsync media from host
     """
     try:
-        local('rsync -avz {0}@{1}:{2} {3}' .format(env.user, env.hosts[0], PROJECT_MEDIA, LOCAL_PROJECT_DIR))
+        local('rsync -avz {0}@{1}:{2} {3}' .format(env.user, env.hosts[0], env.project_parent_dir + '/media', LOCAL_PROJECT_DIR))
         print green("Synchronized {0} media from {1} " .format(env.project_name, env.hosts[0]))
     except:
         print red("Could not syncronize {0} media from {1} " .format(env.project_name, env.hosts[0]))
