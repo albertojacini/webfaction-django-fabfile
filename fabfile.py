@@ -23,6 +23,7 @@ try:
                              PROJECT_DIR,
                              PROJECT_DJANGO_DIR,
                              PROJECT_SETTINGS_MODULE,
+                             PROJECT_MEDIA,
                              REPOSITORY,
                              USER,
                              PASSWORD,
@@ -75,12 +76,13 @@ def bootstrap():
     run('mkdir -p %s/lib/python2.7' % env.home)
     run('easy_install-2.7 pip')
     run('pip-2.7 install virtualenv virtualenvwrapper')
-    run('mkdir -p %s/media' % env.project_parent_dir)
+
 
 
 def install_app():
     """Installs the django project in its own wf app and virtualenv
     """
+    run('mkdir -p %s/media' % env.project_parent_dir)
     response = webfaction_create_app(env.project_name)
     env.app_port = response['port']
 
@@ -438,9 +440,29 @@ def copy_pg_dump_to_local():
 
 
 
-### reload database locally ###
+# -----------------------------------------------------------------------------
+# Load database on remote
+# -----------------------------------------------------------------------------
 
 
 # load database
+def copy_database_to_remote():
+    """copy dumped posgres db, copy on remote machine
+    """
+    try:
+        local('scp {0}/{1}.psql {2}:' .format(LOCAL_PROJECT_DIR, env.pg_database_name, HOST))
+    except:
+        print red('could not copy on remote machine local {0} database' .format(env.pg_database_name))
+        sys.exit(1)
 
-# remove existing database
+
+def load_remote_database():
+    """Load database on remote machine
+    """
+    try:
+        run('psql -f {0}.psql -U {1} -W {0} ' .format(env.pg_database_name, env.pg_database_user))
+    except:
+        print red('could not load on remote machine {0} database' .format(env.pg_database_name))
+        sys.exit(1)
+
+
