@@ -390,7 +390,7 @@ def print_working_dir():
 # -----------------------------------------------------------------------------
 
 def backup():
-    rsync_from_host()
+    rsync_from_remote()
     dump()
 
 
@@ -399,8 +399,8 @@ def dump():
     copy_pg_dump_to_local()
 
 
-def rsync_from_host():
-    """rsync media from host
+def rsync_from_remote():
+    """rsync media from remote
     """
     try:
         local('rsync -avz {0}@{1}:{2} {3}' .format(env.user, env.hosts[0], env.project_parent_dir + '/media', LOCAL_PROJECT_DIR))
@@ -434,12 +434,18 @@ def copy_pg_dump_to_local():
 
 
 # -----------------------------------------------------------------------------
-# Load database on remote
+# Load database and media on remote
 # -----------------------------------------------------------------------------
 
 
+def load_to_remote():
+    copy_database_to_remote()
+    load_remote_database()
+    rsync_to_remote()
+
+
 def copy_database_to_remote():
-    """copy dumped posgres db, copy on remote machine
+    """copy db on remote machine
     """
     try:
         local('scp {0}/{1}.psql {2}:' .format(LOCAL_PROJECT_DIR, env.pg_database_name, HOST))
@@ -449,7 +455,7 @@ def copy_database_to_remote():
 
 
 def load_remote_database():
-    """Load database on remote machine
+    """Load db on remote machine
     """
     try:
         run('psql -f {0}.psql -U {1} -W {0}' .format(env.pg_database_name, env.pg_database_user))
@@ -458,8 +464,8 @@ def load_remote_database():
         sys.exit(1)
 
 
-def rsync_to_host():
-    """rsync media to host
+def rsync_to_remote():
+    """rsync media to remote machine
     """
     try:
         local('rsync -avz {0}/media {1}:{2}' .format(LOCAL_PROJECT_DIR, HOST, env.project_parent_dir))
