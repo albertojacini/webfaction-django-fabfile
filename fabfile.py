@@ -221,7 +221,7 @@ def webfaction_configuration(app):
     webfaction_create_app_static(app)
     webfaction_create_domain(app)
     webfaction_create_website(app)
-    webfaction_create_postgres_db(app + '_pg')
+    webfaction_create_postgres_db(app)
 
 # -----------------------------------------------------------------------------
 # CREATE APP
