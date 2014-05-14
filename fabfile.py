@@ -82,6 +82,7 @@ def install_app():
     """Installs the django project in its own wf app and virtualenv
     """
     run('mkdir -p %s/media' % env.project_parent_dir)
+    upload_secrets()
     response = webfaction_create_app(env.project_name)
     env.app_port = response['port']
 
