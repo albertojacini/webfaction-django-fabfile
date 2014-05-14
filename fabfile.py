@@ -30,7 +30,6 @@ try:
                              VIRTUALENVS,
                              SETTINGS_SUBDIR,
                              LOCAL_PROJECT_DIR,
-                             LOCAL_PROJECT_DIR,
                              PG_DATABASE_NAME,
                              PG_DATABASE_USER,
                              HOST,
@@ -51,6 +50,7 @@ env.project_parent_dir          = PROJECT_PARENT_DIR
 env.project_dir                 = PROJECT_DIR
 env.project_django_dir          = PROJECT_DJANGO_DIR
 env.project_settings_module     = PROJECT_SETTINGS_MODULE
+env.project_media               = PROJECT_MEDIA
 env.apache_dir                  = APACHE_DIR
 env.repo                        = REPOSITORY
 env.pg_database_name            = PG_DATABASE_NAME
@@ -410,12 +410,6 @@ def rsync_from_host():
         print red("Could not syncronize {0} media from {1} " .format(env.project_name, env.hosts[0]))
 
 
-def rsync_to_host():
-    """rsync media from host
-    """
-    rsync_project(PROJECT_MEDIA, LOCAL_PROJECT_DIR, default_opts="-avz")  # todo: to be tested
-
-
 def pg_dump():
     """dump remote postgres db
     """
@@ -445,7 +439,6 @@ def copy_pg_dump_to_local():
 # -----------------------------------------------------------------------------
 
 
-# load database
 def copy_database_to_remote():
     """copy dumped posgres db, copy on remote machine
     """
@@ -460,9 +453,19 @@ def load_remote_database():
     """Load database on remote machine
     """
     try:
-        run('psql -f {0}.psql -U {1} -W {0} ' .format(env.pg_database_name, env.pg_database_user))
+        run('psql -f {0}.psql -U {1} -W {0}' .format(env.pg_database_name, env.pg_database_user))
     except:
         print red('could not load on remote machine {0} database' .format(env.pg_database_name))
         sys.exit(1)
+
+
+def rsync_to_host():
+    """rsync media to host
+    """
+    try:
+        local('rsync -avz {0}/media {1}:{2}' .format(LOCAL_PROJECT_DIR, HOST, env.project_parent_dir))
+        print green("Synchronized {0} media from local to {1} " .format(env.project_name, HOST))
+    except:
+        print red("Could not syncronize {0} media from {1} " .format(env.project_name, HOST))
 
 
