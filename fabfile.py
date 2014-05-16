@@ -463,7 +463,7 @@ def create_local_database():
         local('psql -c "DROP DATABASE {0};"'.format(PG_DATABASE_USER))
         print green('DATABASE {0} dropped'.format(PG_DATABASE_USER))
     except:
-        print red('could not DROP DATABASE {0}. Maybe in use'.format(PG_DATABASE_USER))
+        print red('could not DROP DATABASE {0}. Maybe not existing yet'.format(PG_DATABASE_USER))
 
     try:
         local('psql -c "CREATE DATABASE {0} WITH OWNER {1};"'.format(PG_DATABASE_NAME, PG_DATABASE_USER))
