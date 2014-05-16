@@ -221,9 +221,9 @@ def _ve_run(ve, cmd):
 def webfaction_configuration(app):
     webfaction_create_app_media(app)
     webfaction_create_app_static(app)
-    #webfaction_create_domain(app)
+    webfaction_create_domain(app)
     webfaction_create_website(app)
-    #webfaction_create_postgres_db(app)
+    webfaction_create_postgres_db(app)
 
 # -----------------------------------------------------------------------------
 # CREATE APP
@@ -392,13 +392,27 @@ def print_working_dir():
 # -----------------------------------------------------------------------------
 
 def backup():
+    """Backup media and database
+    """
     rsync_from_remote()
-    dump()
-
-
-def dump():
     pg_dump()
     copy_pg_dump_to_local()
+
+
+# -----------------------------------------------------------------------------
+# LOAD DATABASE on local machine
+# -----------------------------------------------------------------------------
+
+def load_local_database():
+    """DROP CREATE and LOAD new database
+    """
+    create_local_database_user()
+    create_local_database()
+    load_database()
+
+
+
+
 
 
 def rsync_from_remote():
@@ -434,6 +448,36 @@ def copy_pg_dump_to_local():
         sys.exit(1)
 
 
+def create_local_database_user():
+    try:
+        local('psql -c "CREATE USER {0};"'.format(PG_DATABASE_USER))
+        print green('USER and ROLE {0}'.format(PG_DATABASE_USER))
+    except:
+        print red('could not CREATE USER and ROLE {0}. Maybe in use'.format(PG_DATABASE_USER))
+        pass
+
+
+
+def create_local_database():
+    try:
+        local('psql -c "DROP DATABASE {0};"'.format(PG_DATABASE_USER))
+        print green('DATABASE {0} dropped'.format(PG_DATABASE_USER))
+    except:
+        print red('could not DROP DATABASE {0}. Maybe in use'.format(PG_DATABASE_USER))
+
+    try:
+        local('psql -c "CREATE DATABASE {0} WITH OWNER {1};"'.format(PG_DATABASE_NAME, PG_DATABASE_USER))
+        print green('CREATE DATABASE {0}'.format(PG_DATABASE_NAME))
+    except:
+        print red('could not create DATABASE {0}'.format(PG_DATABASE_NAME))
+
+
+def load_database():
+    try:
+        local('psql -f {0}/{1}.sql -U {2} {1}' .format(LOCAL_PROJECT_DIR, PG_DATABASE_NAME, PG_DATABASE_USER))
+        print green('Database {0} loaded'.format(PG_DATABASE_NAME))
+    except:
+        print red('could not load database {0} on local machine' .format(PG_DATABASE_NAME))
 
 
 # -----------------------------------------------------------------------------
@@ -441,7 +485,7 @@ def copy_pg_dump_to_local():
 # -----------------------------------------------------------------------------
 
 
-def load_to_remote():
+def load_on_remote():
     copy_database_to_remote()
     load_remote_database()
     rsync_to_remote()
@@ -462,6 +506,7 @@ def load_remote_database():
     """
     try:
         run('psql -f {0}.sql -U {1} -W {0}' .format(env.pg_database_name, env.pg_database_user))
+        print green('Database {0} loaded'.format(env.pg_database_name))
     except:
         print red('could not load on remote machine {0} database' .format(env.pg_database_name))
         sys.exit(1)
