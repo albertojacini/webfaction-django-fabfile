@@ -34,6 +34,7 @@ try:
                              PG_DATABASE_USER,
                              HOST,
                              APACHE_DIR,
+                             GDRIVE
                              )
 except ImportError:
     print "ImportError: Couldn't find fabsettings.py, it either does not exist or giving import problems (missing settings)"
@@ -81,8 +82,8 @@ def bootstrap():
 def install_app():
     """Installs the django project in its own wf app and virtualenv
     """
-    run('mkdir -p %s/media' % env.project_parent_dir)
-    upload_secrets()
+    #run('mkdir -p %s/media' % env.project_parent_dir)
+    #upload_secrets()
     response = webfaction_create_app(env.project_name)
     env.app_port = response['port']
 
@@ -220,9 +221,9 @@ def _ve_run(ve, cmd):
 def webfaction_configuration(app):
     webfaction_create_app_media(app)
     webfaction_create_app_static(app)
-    webfaction_create_domain(app)
+    #webfaction_create_domain(app)
     webfaction_create_website(app)
-    webfaction_create_postgres_db(app)
+    #webfaction_create_postgres_db(app)
 
 # -----------------------------------------------------------------------------
 # CREATE APP
@@ -425,7 +426,8 @@ def copy_pg_dump_to_local():
     """copy dumped posgres db, copy on local machine and remove the remote one
     """
     try:
-        local('scp {0}:{1}.sql {2}' .format(HOST, env.pg_database_user, LOCAL_PROJECT_DIR,))
+        local('scp {0}:{1}.sql {2}' .format(HOST, env.pg_database_name, LOCAL_PROJECT_DIR,))
+        local('cp {0}/{1}.sql {2}' .format(LOCAL_PROJECT_DIR, env.pg_database_name, GDRIVE,))
         run('rm {0}.sql' .format(env.pg_database_name))
     except:
         print red('could not copy on local machine and remove remotly {0} database' .format(env.pg_database_name))
@@ -459,7 +461,7 @@ def load_remote_database():
     """Load db on remote machine
     """
     try:
-        run('psql -f {0}.psql -U {1} -W {0}' .format(env.pg_database_name, env.pg_database_user))
+        run('psql -f {0}.sql -U {1} -W {0}' .format(env.pg_database_name, env.pg_database_user))
     except:
         print red('could not load on remote machine {0} database' .format(env.pg_database_name))
         sys.exit(1)

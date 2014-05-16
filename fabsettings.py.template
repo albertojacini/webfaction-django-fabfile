@@ -19,3 +19,6 @@ PG_DATABASE_NAME        = "albericajacini"
 PG_DATABASE_USER        = "albericajacini"
 APACHE_DIR              = "/home/ajstudio1/webapps/albericajacini/apache2/bin" # used only for project with apache
 HOST                    = USER + "@" + WF_HOST # used for connection from local to server ex ajstudio1@web316.webfaction.com
+
+
+GDRIVE                  = "~/Google\ Drive/BACKUP_DB"  # ex /BACKUP GOOGLE DRIVE
