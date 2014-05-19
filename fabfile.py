@@ -82,8 +82,8 @@ def bootstrap():
 def install_app():
     """Installs the django project in its own wf app and virtualenv
     """
-    #run('mkdir -p %s/media' % env.project_parent_dir)
-    #upload_secrets()
+    run('mkdir -p %s/media' % env.project_parent_dir)
+    upload_secrets()
     response = webfaction_create_app(env.project_name)
     env.app_port = response['port']
 
@@ -224,6 +224,7 @@ def webfaction_configuration(app):
     webfaction_create_domain(app)
     webfaction_create_website(app)
     webfaction_create_postgres_db(app)
+    load_on_remote()
 
 # -----------------------------------------------------------------------------
 # CREATE APP
@@ -495,7 +496,7 @@ def copy_database_to_remote():
     """copy db on remote machine
     """
     try:
-        local('scp {0}/{1}.psql {2}:' .format(LOCAL_PROJECT_DIR, env.pg_database_name, HOST))
+        local('scp {0}/{1}.sql {2}:' .format(LOCAL_PROJECT_DIR, env.pg_database_name, HOST))
     except:
         print red('could not copy on remote machine local {0} database' .format(env.pg_database_name))
         sys.exit(1)
