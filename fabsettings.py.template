@@ -1,24 +1,45 @@
-# your projects settings
+# AVAILABLE WEBFACTION HOSTS
+# ajstudio1: web316.webfaction.com, ip: 5.153.9.53
+# dry01    : web331.webfaction.com, ip: 37.58.75.241
+# dry02    : web331.webfaction.com, ip: 37.58.75.241
+# dry03    : web403.webfaction.com, ip: 37.58.75.229
+
+
+
+#----Remote settings--------------------------------------------------------------#
 
 WF_HOST                 = "web331.webfaction.com"
-IP_HOST                 = "111.222.333.444"
-PROJECT_NAME            = "foo"
-PROJECT_DIR_NAME        = "foo_project"
-PROJECT_PARENT_DIR      = "/home/dry02/foo"
-PROJECT_MEDIA           = "/home/dry02/foo/media"
-PROJECT_DIR             = "/home/dry02/foo/foo_project"
-PROJECT_DJANGO_DIR      = "/home/dry02/foo/foo_project/foo"
+IP_HOST                 = "37.58.75.241"
+PROJECT_NAME            = "jalupro"
+USER                    = "dry02"
+PASSWORD                = "arpe77jaci"
+PG_DATABASE_NAME        = "jalupro"
+PG_DATABASE_USER        = "jalupro"
 PROJECT_SETTINGS_MODULE = "settings.production"
-REPOSITORY              = "git@bitbucket.org:albertojacini/foo-project.git"
-USER                    = "bar"
-PASSWORD                = "foo_pw"
-SETTINGS_SUBDIR         = "foo"  # Todo: what should I do with this?
-VIRTUALENVS             = "/home/bar/.virtualenvs"
+
+
+#----Repo settings---------------------------------------------------------------#
+
+REPOSITORY              = "https://arpesanif@bitbucket.org/arpesanif/jalupro_project.git"
+
+#----Local settings--------------------------------------------------------------#
+
 LOCAL_PROJECT_DIR       = "../.."  # ex /albericajacini_project
-PG_DATABASE_NAME        = "albericajacini"
-PG_DATABASE_USER        = "albericajacini"
-APACHE_DIR              = "/home/ajstudio1/webapps/albericajacini/apache2/bin" # used only for project with apache
-HOST                    = USER + "@" + WF_HOST # used for connection from local to server ex ajstudio1@web316.webfaction.com
-
-
 GDRIVE                  = "~/Google\ Drive/BACKUP_DB"  # ex /BACKUP GOOGLE DRIVE
+
+
+
+
+
+
+#--------------------------------------------------------------------------------#
+
+PROJECT_BASE_DIR        = "/home/" + USER + "/"
+PROJECT_PARENT_DIR      = PROJECT_BASE_DIR + PROJECT_NAME + "/"
+PROJECT_DIR_NAME        = PROJECT_NAME + "_project"
+PROJECT_DIR             = PROJECT_PARENT_DIR + PROJECT_DIR_NAME
+PROJECT_MEDIA           = PROJECT_PARENT_DIR + "media"
+PROJECT_DJANGO_DIR      = PROJECT_DIR + "/" + PROJECT_NAME
+VIRTUALENVS             = PROJECT_BASE_DIR + ".virtualenvs"
+APACHE_DIR              = "/home/ajstudio1/webapps/" + PROJECT_NAME + "/apache2/bin" # used only for project with apache
+HOST                    = USER + "@" + WF_HOST  # used for connection from local to server ex ajstudio1@web316.webfaction.com

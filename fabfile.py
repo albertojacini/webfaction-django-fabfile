@@ -28,7 +28,6 @@ try:
                              USER,
                              PASSWORD,
                              VIRTUALENVS,
-                             SETTINGS_SUBDIR,
                              LOCAL_PROJECT_DIR,
                              PG_DATABASE_NAME,
                              PG_DATABASE_USER,
@@ -57,7 +56,6 @@ env.repo                        = REPOSITORY
 env.pg_database_name            = PG_DATABASE_NAME
 env.pg_database_user            = PG_DATABASE_USER
 env.webfaction_app_dir          = env.home + '/webapps/' + env.project_name
-env.settings_dir                = env.webfaction_app_dir + '/' + SETTINGS_SUBDIR
 env.supervisor_dir              = env.home + '/webapps/supervisor'
 env.virtualenv_dir              = VIRTUALENVS
 env.supervisor_ve_dir           = env.virtualenv_dir + '/supervisor'
@@ -82,8 +80,8 @@ def bootstrap():
 def install_app():
     """Installs the django project in its own wf app and virtualenv
     """
-    run('mkdir -p %s/media' % env.project_parent_dir)
-    upload_secrets()
+    #run('mkdir -p %s/media' % env.project_parent_dir)
+    #upload_secrets()
     response = webfaction_create_app(env.project_name)
     env.app_port = response['port']
 
@@ -101,14 +99,14 @@ def install_app():
                     }
                     )
 
-    with cd(env.project_parent_dir):
-        if not exists(env.project_dir):
-            run('git clone {0} {1}'.format(env.repo, env.project_dir))
-
-    _create_ve(env.project_name)
-    webfaction_configuration(env.project_name)
-    reload_app()
-    restart_app()
+    # with cd(env.project_parent_dir):
+    #     if not exists(env.project_dir):
+    #         run('git clone {0} {1}'.format(env.repo, env.project_dir))
+    #
+    # _create_ve(env.project_name)
+    # webfaction_configuration(env.project_name)
+    # reload_app()
+    # restart_app()
 
 def upload_secrets():
     """upload secrets.json from local directory
