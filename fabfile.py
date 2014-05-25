@@ -394,7 +394,7 @@ def backup():
     """Backup media and database
     """
     rsync_from_remote()
-    pg_dump()
+    #pg_dump()
     copy_pg_dump_to_local()
 
 
@@ -436,12 +436,15 @@ def pg_dump():
 
 
 def copy_pg_dump_to_local():
-    """copy dumped posgres db, copy on local machine and remove the remote one
+    """
+    copy dumped posgres db in db_backup forlder
+    created with a cronjob and copy on local machine 
+    project dir and googledrive folder
     """
     try:
-        local('scp {0}:{1}.sql {2}' .format(HOST, env.pg_database_name, LOCAL_PROJECT_DIR,))
+        local('scp {0}:db_backups/{1}.sql {2}' .format(HOST, env.pg_database_name, LOCAL_PROJECT_DIR,))
         local('cp {0}/{1}.sql {2}' .format(LOCAL_PROJECT_DIR, env.pg_database_name, GDRIVE,))
-        run('rm {0}.sql' .format(env.pg_database_name))
+        #run('rm {0}.sql' .format(env.pg_database_name))
     except:
         print red('could not copy on local machine and remove remotly {0} database' .format(env.pg_database_name))
         sys.exit(1)
