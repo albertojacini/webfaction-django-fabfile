@@ -216,13 +216,28 @@ def _ve_run(ve, cmd):
     run("""source %s/%s/bin/activate && %s""" % (env.virtualenv_dir, ve, cmd))
 
 
+def add_cronjob():
+    """
+    add postgres database dump cronjob in db_backup folder
+    """
+    try:
+        run('crontab -l > /tmp/crondump')
+        run('echo "0 1 * * * /usr/local/pgsql/bin/pg_dump -Fp -b -U {0} {1} > $HOME/db_backups/{1}.sql 2>> $HOME/db_backups/cron.log" >> /tmp/crondump'.format(env.pg_database_user, env.pg_database_name))
+        run('crontab /tmp/crondump')
+        print green("Backup cronjob added")
+    except:
+        print red("Fail to add backup cronjob")
+
+
+
 def webfaction_configuration(app):
     webfaction_create_app_media(app)
     webfaction_create_app_static(app)
     webfaction_create_domain(app)
     webfaction_create_website(app)
     webfaction_create_postgres_db(app)
-    load_on_remote()
+    add_cronjob()
+    load_on_remote()  # use only if you have a database yet
 
 # -----------------------------------------------------------------------------
 # CREATE APP
@@ -380,7 +395,8 @@ def webfaction_create_postgres_db(db):
 
 def print_working_dir():
     """
-    TODO: REMOVE THIS. It just tests the server connection.
+    TODO: REMOVE THIS.
+    It just tests the server connection.
     """
     with cd(env.project_dir):
         with prefix('workon {0}'.format(env.project_name)):
@@ -390,11 +406,14 @@ def print_working_dir():
 # Backup media and postgres db
 # -----------------------------------------------------------------------------
 
+
 def backup():
-    """Backup media and database
+    """
+    Backup media and database from
+    remote db_backup folder. Cronjobs provide
+    to dayly dump project postgres database
     """
     rsync_from_remote()
-    #pg_dump()
     copy_pg_dump_to_local()
 
 
@@ -402,12 +421,12 @@ def backup():
 # LOAD DATABASE on local machine
 # -----------------------------------------------------------------------------
 
-def load_local_database():
+def load_on_local():
     """DROP CREATE and LOAD new database
     """
     create_local_database_user()
     create_local_database()
-    load_database()
+    load_local_database()
 
 
 
@@ -438,7 +457,7 @@ def pg_dump():
 def copy_pg_dump_to_local():
     """
     copy dumped posgres db in db_backup forlder
-    created with a cronjob and copy on local machine 
+    created with a cronjob and copy on local machine
     project dir and googledrive folder
     """
     try:
@@ -474,7 +493,7 @@ def create_local_database():
         print red('could not create DATABASE {0}'.format(PG_DATABASE_NAME))
 
 
-def load_database():
+def load_local_database():
     try:
         local('psql -f {0}/{1}.sql -U {2} {1}' .format(LOCAL_PROJECT_DIR, PG_DATABASE_NAME, PG_DATABASE_USER))
         print green('Database {0} loaded'.format(PG_DATABASE_NAME))
