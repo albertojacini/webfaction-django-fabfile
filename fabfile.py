@@ -73,6 +73,7 @@ def deploy():
 
 def bootstrap():
     run('mkdir -p %s/lib/python2.7' % env.home)
+    run('mkdir db_backups' % env.home)
     run('easy_install-2.7 pip')
     run('pip install virtualenv virtualenvwrapper')
 
