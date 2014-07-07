@@ -18,22 +18,7 @@ PG_DATABASE_NAME        = "jalupro"
 PG_DATABASE_USER        = "jalupro"
 PROJECT_SETTINGS_MODULE = "settings.production"
 
-
-#----Repo settings---------------------------------------------------------------#
-
-REPOSITORY              = "https://arpesanif@bitbucket.org/arpesanif/jalupro_project.git"
-
-#----Local settings--------------------------------------------------------------#
-
-LOCAL_PROJECT_DIR       = "../.."  # ex /albericajacini_project
-GDRIVE                  = "~/Google\ Drive/BACKUP_DB"  # ex /BACKUP GOOGLE DRIVE
-
-
-
-
-
-
-#--------------------------------------------------------------------------------#
+#----Auto settings (no need to edit)----------------------------------------------#
 
 PROJECT_BASE_DIR        = "/home/" + USER + "/"
 PROJECT_PARENT_DIR      = PROJECT_BASE_DIR + PROJECT_NAME + "/"
@@ -44,3 +29,12 @@ PROJECT_DJANGO_DIR      = PROJECT_DIR + "/" + PROJECT_NAME
 VIRTUALENVS             = PROJECT_BASE_DIR + ".virtualenvs"
 APACHE_DIR              = "/home/ajstudio1/webapps/" + PROJECT_NAME + "/apache2/bin" # used only for project with apache
 HOST                    = USER + "@" + WF_HOST  # used for connection from local to server ex ajstudio1@web316.webfaction.com
+
+#----Repo settings---------------------------------------------------------------#
+
+REPOSITORY              = "https://arpesanif@bitbucket.org/arpesanif/jalupro_project.git"
+
+#----Local settings--------------------------------------------------------------#
+
+LOCAL_PROJECT_DIR       = "../.."  # ex /albericajacini_project
+GDRIVE                  = "~/Google\ Drive/BACKUP_DB"  # ex /BACKUP GOOGLE DRIVE
