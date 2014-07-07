@@ -145,7 +145,6 @@ def install_supervisor():
                     )
 
 
-
     # add to crontab
 
     filename = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(7))
@@ -230,7 +229,6 @@ def add_cronjob():
         print red("Fail to add backup cronjob")
 
 
-
 def webfaction_configuration(app):
     webfaction_create_app_media(app)
     webfaction_create_app_static(app)
@@ -238,7 +236,7 @@ def webfaction_configuration(app):
     webfaction_create_website(app)
     webfaction_create_postgres_db(PG_DATABASE_NAME)
     add_cronjob()
-    load_on_remote()  # use only if you have a database yet
+    load_to_remote()  # use only if you have a database yet
 
 # -----------------------------------------------------------------------------
 # CREATE APP
@@ -430,10 +428,6 @@ def load_on_local():
     load_local_database()
 
 
-
-
-
-
 def rsync_from_remote():
     """rsync media from remote
     """
@@ -479,7 +473,6 @@ def create_local_database_user():
         pass
 
 
-
 def create_local_database():
     try:
         local('psql -c "DROP DATABASE {0};"'.format(PG_DATABASE_USER))
@@ -507,7 +500,7 @@ def load_local_database():
 # -----------------------------------------------------------------------------
 
 
-def load_on_remote():
+def load_to_remote():
     copy_database_to_remote()
     load_remote_database()
     rsync_to_remote()
