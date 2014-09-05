@@ -61,6 +61,9 @@ env.virtualenv_dir              = VIRTUALENVS
 env.supervisor_ve_dir           = env.virtualenv_dir + '/supervisor'
 
 
+def text():
+    run('pwd')
+
 
 def deploy():
     bootstrap()
@@ -73,7 +76,7 @@ def deploy():
 
 def bootstrap():
     run('mkdir -p %s/lib/python2.7' % env.home)
-    run('mkdir db_backups' % env.home)
+    run('mkdir db_backups')
     run('easy_install-2.7 pip')
     run('pip install virtualenv virtualenvwrapper')
 
