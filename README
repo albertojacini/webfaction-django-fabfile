@@ -1,3 +1,43 @@
+Usage
+=====
+```
+cd ~/example_project
+git submodules add git@github.com:albertojacini/webfaction-django-fabfile.git
+```
+
+- Make a copy of fabsettings.py.template (and remove .temmplate from the file name)
+- Set your variables in fabsettings.py
+cd ~/example_project/webfaction-django-fabfile
+- if the Webfaction account is new:
+`fab bootstrap`
+- run:
+`fab install_app`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OLD STUFF
+==================================
+
 webfaction django deployment script
 ===================================
 
