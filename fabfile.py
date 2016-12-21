@@ -176,7 +176,7 @@ def reload_app(arg=None):
             # _ve_run(env.project_name, "pip install gunicorn")
             _ve_run(env.project_name, "pip install -r requirements/production.txt")
         with cd(env.project_django_dir):
-            _ve_run(env.project_name, "python manage.py syncdb --settings={0}".format(env.project_settings_module))
+            # _ve_run(env.project_name, "python manage.py syncdb --settings={0}".format(env.project_settings_module))
             _ve_run(env.project_name, "python manage.py migrate --settings={0}".format(env.project_settings_module))
             _ve_run(env.project_name, "python manage.py collectstatic --noinput --settings={0}".format(env.project_settings_module))
 
