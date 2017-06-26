@@ -1,8 +1,15 @@
 Usage
 =====
+When adding the submodule for the first time
 ```
 cd ~/example_project
 git submodules add git@github.com:albertojacini/webfaction-django-fabfile.git
+```
+
+When cloning a project that contains this submodule
+```
+git submodule init
+$ git submodule update
 ```
 
 - Make a copy of fabsettings.py.template (and remove .temmplate from the file name)
